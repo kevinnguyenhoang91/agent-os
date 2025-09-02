@@ -3,7 +3,7 @@
 # Agent OS Base Installation Script
 # This script installs Agent OS to the current directory
 
-set -e  # Exit on error
+set -e # Exit on error
 
 # Initialize flags
 OVERWRITE_INSTRUCTIONS=false
@@ -13,50 +13,50 @@ CLAUDE_CODE=false
 CURSOR=false
 
 # Base URL for raw GitHub content
-BASE_URL="https://raw.githubusercontent.com/buildermethods/agent-os/main"
+BASE_URL="https://raw.githubusercontent.com/kevinnguyenhoang91/agent-os/main"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
-    case $1 in
-        --overwrite-instructions)
-            OVERWRITE_INSTRUCTIONS=true
-            shift
-            ;;
-        --overwrite-standards)
-            OVERWRITE_STANDARDS=true
-            shift
-            ;;
-        --overwrite-config)
-            OVERWRITE_CONFIG=true
-            shift
-            ;;
-        --claude-code|--claude|--claude_code)
-            CLAUDE_CODE=true
-            shift
-            ;;
-        --cursor|--cursor-cli)
-            CURSOR=true
-            shift
-            ;;
-        -h|--help)
-            echo "Usage: $0 [OPTIONS]"
-            echo ""
-            echo "Options:"
-            echo "  --overwrite-instructions    Overwrite existing instruction files"
-            echo "  --overwrite-standards       Overwrite existing standards files"
-            echo "  --overwrite-config          Overwrite existing config.yml"
-            echo "  --claude-code               Add Claude Code support"
-            echo "  --cursor                    Add Cursor support"
-            echo "  -h, --help                  Show this help message"
-            echo ""
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
-    esac
+	case $1 in
+	--overwrite-instructions)
+		OVERWRITE_INSTRUCTIONS=true
+		shift
+		;;
+	--overwrite-standards)
+		OVERWRITE_STANDARDS=true
+		shift
+		;;
+	--overwrite-config)
+		OVERWRITE_CONFIG=true
+		shift
+		;;
+	--claude-code | --claude | --claude_code)
+		CLAUDE_CODE=true
+		shift
+		;;
+	--cursor | --cursor-cli)
+		CURSOR=true
+		shift
+		;;
+	-h | --help)
+		echo "Usage: $0 [OPTIONS]"
+		echo ""
+		echo "Options:"
+		echo "  --overwrite-instructions    Overwrite existing instruction files"
+		echo "  --overwrite-standards       Overwrite existing standards files"
+		echo "  --overwrite-config          Overwrite existing config.yml"
+		echo "  --claude-code               Add Claude Code support"
+		echo "  --cursor                    Add Cursor support"
+		echo "  -h, --help                  Show this help message"
+		echo ""
+		exit 0
+		;;
+	*)
+		echo "Unknown option: $1"
+		echo "Use --help for usage information"
+		exit 1
+		;;
+	esac
 done
 
 echo ""
@@ -91,50 +91,50 @@ install_from_github "$INSTALL_DIR" "$OVERWRITE_INSTRUCTIONS" "$OVERWRITE_STANDAR
 echo ""
 echo "📥 Downloading configuration..."
 download_file "${BASE_URL}/config.yml" \
-    "$INSTALL_DIR/config.yml" \
-    "$OVERWRITE_CONFIG" \
-    "config.yml"
+	"$INSTALL_DIR/config.yml" \
+	"$OVERWRITE_CONFIG" \
+	"config.yml"
 
 # Download setup/project.sh
 echo ""
 echo "📥 Downloading project setup script..."
 download_file "${BASE_URL}/setup/project.sh" \
-    "$INSTALL_DIR/setup/project.sh" \
-    "true" \
-    "setup/project.sh"
+	"$INSTALL_DIR/setup/project.sh" \
+	"true" \
+	"setup/project.sh"
 chmod +x "$INSTALL_DIR/setup/project.sh"
 
 # Handle Claude Code installation
 if [ "$CLAUDE_CODE" = true ]; then
-    echo ""
-    echo "📥 Downloading Claude Code agent templates..."
-    mkdir -p "$INSTALL_DIR/claude-code/agents"
+	echo ""
+	echo "📥 Downloading Claude Code agent templates..."
+	mkdir -p "$INSTALL_DIR/claude-code/agents"
 
-    # Download agents to base installation for project use
-    echo "  📂 Agent templates:"
-    for agent in context-fetcher date-checker file-creator git-workflow project-manager test-runner; do
-        download_file "${BASE_URL}/claude-code/agents/${agent}.md" \
-            "$INSTALL_DIR/claude-code/agents/${agent}.md" \
-            "false" \
-            "claude-code/agents/${agent}.md"
-    done
+	# Download agents to base installation for project use
+	echo "  📂 Agent templates:"
+	for agent in context-fetcher date-checker file-creator git-workflow project-manager test-runner; do
+		download_file "${BASE_URL}/claude-code/agents/${agent}.md" \
+			"$INSTALL_DIR/claude-code/agents/${agent}.md" \
+			"false" \
+			"claude-code/agents/${agent}.md"
+	done
 
-    # Update config to enable claude_code
-    if [ -f "$INSTALL_DIR/config.yml" ]; then
-        sed -i.bak '/claude_code:/,/enabled:/ s/enabled: false/enabled: true/' "$INSTALL_DIR/config.yml" && rm "$INSTALL_DIR/config.yml.bak"
-    fi
+	# Update config to enable claude_code
+	if [ -f "$INSTALL_DIR/config.yml" ]; then
+		sed -i.bak '/claude_code:/,/enabled:/ s/enabled: false/enabled: true/' "$INSTALL_DIR/config.yml" && rm "$INSTALL_DIR/config.yml.bak"
+	fi
 fi
 
 # Handle Cursor installation
 if [ "$CURSOR" = true ]; then
-    echo ""
-    echo "📥 Enabling Cursor support..."
+	echo ""
+	echo "📥 Enabling Cursor support..."
 
-    # Only update config to enable cursor
-    if [ -f "$INSTALL_DIR/config.yml" ]; then
-        sed -i.bak '/cursor:/,/enabled:/ s/enabled: false/enabled: true/' "$INSTALL_DIR/config.yml" && rm "$INSTALL_DIR/config.yml.bak"
-        echo "  ✓ Cursor enabled in configuration"
-    fi
+	# Only update config to enable cursor
+	if [ -f "$INSTALL_DIR/config.yml" ]; then
+		sed -i.bak '/cursor:/,/enabled:/ s/enabled: false/enabled: true/' "$INSTALL_DIR/config.yml" && rm "$INSTALL_DIR/config.yml.bak"
+		echo "  ✓ Cursor enabled in configuration"
+	fi
 fi
 
 # Success message
@@ -161,7 +161,7 @@ echo "   $INSTALL_DIR/config.yml         - Configuration"
 echo "   $INSTALL_DIR/setup/project.sh   - Project installation script"
 
 if [ "$CLAUDE_CODE" = true ]; then
-    echo "   $INSTALL_DIR/claude-code/agents/ - Claude Code agent templates"
+	echo "   $INSTALL_DIR/claude-code/agents/ - Claude Code agent templates"
 fi
 
 echo ""
