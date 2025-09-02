@@ -44,7 +44,7 @@ IF current task involves writing or updating HTML, CSS, or TailwindCSS:
     NOTE: "Using HTML/CSS style guides already in context"
   ELSE:
     <context_fetcher_strategy>
-      IF current agent is Claude Code AND context-fetcher agent exists:
+      IF context-fetcher agent exists:
         USE: @agent:context-fetcher
         REQUEST: "Get HTML formatting rules from code-style/html-style.md"
         REQUEST: "Get CSS and TailwindCSS rules from code-style/css-style.md"
@@ -65,7 +65,7 @@ IF current task involves writing or updating JavaScript:
     NOTE: "Using JavaScript style guide already in context"
   ELSE:
     <context_fetcher_strategy>
-      IF current agent is Claude Code AND context-fetcher agent exists:
+      IF context-fetcher agent exists:
         USE: @agent:context-fetcher
         REQUEST: "Get JavaScript style rules from code-style/javascript-style.md"
         PROCESS: Returned style rules
@@ -74,4 +74,76 @@ IF current task involves writing or updating JavaScript:
     </context_fetcher_strategy>
 ELSE:
   SKIP: JavaScript style guide not relevant to current task
+</conditional-block>
+
+<conditional-block task-condition="typescript" context-check="typescript-style">
+IF current task involves writing or updating TypeScript:
+  IF typescript-style.md already in context:
+    SKIP: Re-reading this file
+    NOTE: "Using TypeScript style guide already in context"
+  ELSE:
+    <context_fetcher_strategy>
+      IF context-fetcher agent exists:
+        USE: @agent:context-fetcher
+        REQUEST: "Get TypeScript style rules from code-style/javascript-style.md"
+        PROCESS: Returned style rules
+      ELSE:
+        READ: @.agent-os/standards/code-style/typescript-style.md
+    </context_fetcher_strategy>
+ELSE:
+  SKIP: TypeScript style guide not relevant to current task
+</conditional-block>
+
+<conditional-block task-condition="markdown" context-check="markdown-style">
+IF current task involves writing or updating MarkDown:
+  IF markdown-style.md already in context:
+    SKIP: Re-reading this file
+    NOTE: "Using MarkDown style guide already in context"
+  ELSE:
+    <context_fetcher_strategy>
+      IF context-fetcher agent exists:
+        USE: @agent:context-fetcher
+        REQUEST: "Get MarkDown style rules from code-style/markdown-style.md"
+        PROCESS: Returned style rules
+      ELSE:
+        READ: @.agent-os/standards/code-style/markdown-style.md
+    </context_fetcher_strategy>
+ELSE:
+  SKIP: MarkDown style guide not relevant to current task
+</conditional-block>
+
+<conditional-block task-condition="sql" context-check="sql-style">
+IF current task involves writing or updating SQL queries, database schemas, or migrations:
+  IF sql-style.md already in context:
+    SKIP: Re-reading this file
+    NOTE: "Using SQL style guide already in context"
+  ELSE:
+    <context_fetcher_strategy>
+      IF context-fetcher agent exists:
+        USE: @agent:context-fetcher
+        REQUEST: "Get SQL style rules from code-style/sql-style.md"
+        PROCESS: Returned style rules
+      ELSE:
+        READ: @.agent-os/standards/code-style/sql-style.md
+    </context_fetcher_strategy>
+ELSE:
+  SKIP: SQL style guide not relevant to current task
+</conditional-block>
+
+<conditional-block task-condition="shell" context-check="shell-style">
+IF current task involves writing or updating shell scripts, build scripts, or DevOps automation:
+  IF shell-style.md already in context:
+    SKIP: Re-reading this file
+    NOTE: "Using Shell Script style guide already in context"
+  ELSE:
+    <context_fetcher_strategy>
+      IF context-fetcher agent exists:
+        USE: @agent:context-fetcher
+        REQUEST: "Get Shell Script style rules from code-style/shell-style.md"
+        PROCESS: Returned style rules
+      ELSE:
+        READ: @.agent-os/standards/code-style/shell-style.md
+    </context_fetcher_strategy>
+ELSE:
+  SKIP: Shell Script style guide not relevant to current task
 </conditional-block>
