@@ -14,6 +14,22 @@ Based on Google TypeScript Style Guide with Backstage project adaptations.
 - Always use semicolons to terminate statements
 - Required for all statements, including interface and type declarations
 
+### Quote Style
+- Use **double quotes** for strings and object keys
+- Use template literals for string interpolation
+- Use single quotes only when avoiding escaping double quotes
+
+```javascript
+// Good
+const message = "Hello world";
+const greeting = `Hello ${name}!`;
+const html = '<div class="container">Content</div>';
+
+// Bad
+const message = 'Hello world';
+const greeting = "Hello " + name + "!";
+```
+
 ## Type Annotations
 
 ### Explicit vs Inferred Types

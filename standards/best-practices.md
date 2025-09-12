@@ -101,25 +101,38 @@ All development should be performed using DevContainers to ensure:
 
 #### Best Practices
 
-- Always use `mcp-devcontainers` tools for running commands in containers
+- Always use `docker exec` for running commands in DevContainers
 - Append `--no-watch --verbose` to yarn/npm commands for better CI output
 - Keep devcontainer configuration in version control
 - Document any manual setup steps in `.devcontainer/README.md`
-- Test devcontainer setup on fresh machines regularly
 
 #### DevContainer Command Execution and Troubleshooting
 
-When executing commands in DevContainers, always use output log paths for debugging and problem resolution:
-
-##### Standard Command Pattern
+##### Common DevContainer Commands
 
 ```bash
-# Always specify an output log file path
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/path/to/project" \
-  --outputFilePath="/tmp/command-output.log" \
-  --command=["yarn", "install", "--verbose"]
+# Install dependencies
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn install"
+
+# Run tests with logging
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn test --no-watch --verbose"
+
+# TypeScript compilation check
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn tsc"
+
+# Lint check
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn lint"
 ```
+
+## Build/Test Commands
+
+- I have set up a devcontainer, must always run `yarn` or `npm` command inside it by using `docker exec`.
+- `yarn test` - Run all tests, `yarn test:all` with coverage
+- `yarn test packages/*/src/specific.test.ts` - Run single test file
+- `yarn lint` - ESLint check (since origin/master), `yarn lint:all` for all files
+- `yarn tsc` - TypeScript check, `yarn tsc:full` for complete validation
+- `yarn build:all` - Build all packages and plugins
+- `yarn dev` - Start development (app + backend), `yarn start-backend` for backend only
 
 ##### Troubleshooting Workflow
 
@@ -152,89 +165,12 @@ grep -i "error TS\|cannot find module\|failed to compile" /tmp/build.log
 grep -i "connection\|timeout\|auth\|schema" /tmp/database.log
 ```
 
-##### Example Troubleshooting Session
-
-```bash
-# 1. Execute command with logging
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/backstage-build.log" \
-  --command=["yarn", "build:backend", "--verbose"]
-
-# 2. Check if command succeeded
-if [ $? -ne 0 ]; then
-  echo "Build failed, analyzing logs..."
-
-  # 3. Analyze specific error patterns
-  echo "TypeScript errors:"
-  grep "error TS" /tmp/backstage-build.log
-
-  echo "Missing dependencies:"
-  grep "Cannot resolve dependency" /tmp/backstage-build.log
-
-  echo "Configuration issues:"
-  grep -i "config.*error\|invalid.*config" /tmp/backstage-build.log
-fi
-
-# 4. Take corrective action based on log analysis
-# Example: If missing dependency found, install it
-if grep -q "Cannot resolve dependency" /tmp/backstage-build.log; then
-  echo "Installing missing dependencies..."
-  mcp-devcontainers_devcontainer_exec \
-    --workspaceFolder="/workspace" \
-    --outputFilePath="/tmp/dependency-install.log" \
-    --command=["yarn", "install", "--check-files"]
-fi
-```
-
 ##### Log File Management Best Practices
 
 - **Descriptive Names**: Use meaningful log file names that indicate the operation
 - **Timestamp Integration**: Include timestamps in log file names for tracking
 - **Log Rotation**: Clean up old log files to prevent disk space issues
 - **Structured Logging**: Use consistent log file locations for easy access
-
-##### Common DevContainer Issues and Solutions
-
-**Container Startup Problems**:
-
-```bash
-# Log container initialization
-mcp-devcontainers_devcontainer_up \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/container-startup.log"
-
-# Check for common issues
-grep -i "port.*conflict\|volume.*error\|permission.*denied" /tmp/container-startup.log
-```
-
-**Environment Configuration Issues**:
-
-```bash
-# Verify environment setup
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/env-check.log" \
-  --command=["env"]
-
-# Check for missing environment variables
-grep -i "undefined\|not.*set\|missing" /tmp/env-check.log
-```
-
-**Service Dependencies**:
-
-```bash
-# Test database connectivity
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/db-test.log" \
-  --command=["yarn", "backstage-cli", "migrate:status"]
-
-# Analyze database connection issues
-grep -i "connection.*refused\|timeout\|authentication" /tmp/db-test.log
-```
-
-This systematic approach ensures that all DevContainer operations are logged and issues can be quickly identified and resolved through log analysis.
 
 #### DevContainer Testing Best Practices
 
@@ -244,16 +180,13 @@ Based on comprehensive unit testing experience with Backstage plugins, these pra
 
 ```bash
 # Validate test environment before running tests
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/test-env-check.log" \
-  --command=["node", "--version"]
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn test --no-watch --verbose"
+```
 
 # Verify TypeScript compilation
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/tsc-check.log" \
-  --command=["npx", "tsc", "--noEmit"]
+
+```bash
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn tsc"
 ```
 
 ##### Test Execution Patterns
@@ -261,19 +194,13 @@ mcp-devcontainers_devcontainer_exec \
 **Individual Test Files**:
 ```bash
 # Run specific test file with comprehensive logging
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace/plugins/your-plugin" \
-  --outputFilePath="/tmp/test-individual.log" \
-  --command=["npx", "jest", "src/__tests__/your-test.test.ts", "--verbose", "--no-cache", "--forceExit"]
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage && yarn test src/__tests__/your-test.test.ts --no-watch --verbose"
 ```
 
 **Test Suite Validation**:
 ```bash
 # Run comprehensive test suite
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace" \
-  --outputFilePath="/tmp/test-suite.log" \
-  --command=["yarn", "workspace", "@internal/your-plugin", "test", "--", "--verbose", "--passWithNoTests"]
+docker exec -it backstage-devcontainer zsh -c "cd /workspaces/backstage/plugins/my-plugin && yarn test --no-watch --verbose"
 ```
 
 ##### Test Output Analysis
@@ -294,26 +221,6 @@ grep -i "error TS\|cannot find module\|type.*error" /tmp/test-compilation.log
 ```bash
 # Check for service initialization failures in tests
 grep -i "service.*error\|initialization.*failed\|dependency.*missing" /tmp/test-service.log
-```
-
-##### Testing Framework Integration
-
-**Backstage Plugin Testing**:
-```bash
-# Validate Backstage plugin test setup
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace/plugins/logistics-observer-backend" \
-  --outputFilePath="/tmp/backstage-plugin-test.log" \
-  --command=["npx", "jest", "--listTests"]
-```
-
-**Database Testing with TestDatabases**:
-```bash
-# Test database integration with proper cleanup
-mcp-devcontainers_devcontainer_exec \
-  --workspaceFolder="/workspace/plugins/your-plugin" \
-  --outputFilePath="/tmp/database-test.log" \
-  --command=["npx", "jest", "src/database/__tests__", "--runInBand", "--detectOpenHandles"]
 ```
 
 ##### Common Testing Issues and Solutions

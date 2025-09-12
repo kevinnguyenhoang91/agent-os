@@ -27,8 +27,8 @@ ELSE:
 
 ### String Formatting
 
-- Use single quotes for strings: `'Hello World'`
-- Use double quotes only when interpolation is needed
+- Use double quotes for strings: `"Hello World"`
+- Use double quotes when interpolation is needed
 - Use template literals for multi-line strings or complex interpolation
 
 ### Code Comments
